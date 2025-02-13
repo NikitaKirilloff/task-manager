@@ -1,0 +1,22 @@
+auth:
+  secret: 357638792F423F4428472B4B62506552357638792F423F4428472B4B62506552
+  access-token:
+    expiration: PT1H  # 1 час
+  refresh-token:
+    expiration: P7D  # 7 дней
+
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taskmanager
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
