@@ -2,31 +2,38 @@ package com.kirilloff.taskmanager.controller;
 
 import com.kirilloff.taskmanager.domain.request.TaskRequestDTO;
 import com.kirilloff.taskmanager.domain.response.TaskResponseDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public interface TaskController {
 
-  TaskResponseDTO getTask(@PathVariable UUID id);
+  ResponseEntity<TaskResponseDTO> getTask(@PathVariable UUID id);
 
-  List<TaskResponseDTO> getTasks(@RequestParam LocalDate start, @RequestParam LocalDate end,
-      @RequestParam Boolean completed);
+  ResponseEntity<List<TaskResponseDTO>> getTasks(
+      @RequestParam @NotNull(message = "Дата начала не может быть пустой") LocalDate start,
+      @RequestParam @NotNull(message = "Дата окончания не может быть пустой") LocalDate end,
+      @RequestParam(required = false) Boolean completed);
 
-  List<TaskResponseDTO> getTodayTasks(@RequestParam(required = false) Boolean completed);
+  ResponseEntity<List<TaskResponseDTO>> getWeekTasks(
+      @RequestParam(required = false) Boolean completed);
 
-  List<TaskResponseDTO> getWeekTasks(@RequestParam(required = false) Boolean completed);
 
-  List<TaskResponseDTO> getMonthTasks(@RequestParam(required = false) Boolean completed);
+  ResponseEntity<List<TaskResponseDTO>> getMonthTasks(
+      @RequestParam(required = false) Boolean completed);
 
-  TaskResponseDTO createTask(@RequestBody TaskRequestDTO task);
+  ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO task);
 
-  TaskResponseDTO updateTask(@PathVariable UUID id, @RequestBody TaskRequestDTO taskUpdateDTO);
+  ResponseEntity<TaskResponseDTO> updateTask(@PathVariable UUID id,
+      @Valid @RequestBody TaskRequestDTO taskUpdateDTO);
 
-  TaskResponseDTO toggleTaskCompletion(@PathVariable UUID id);
+  ResponseEntity<TaskResponseDTO> toggleTaskCompletion(@PathVariable UUID id);
 
-  void deleteTask(@PathVariable UUID id);
+  ResponseEntity<Void> deleteTask(@PathVariable UUID id);
 }

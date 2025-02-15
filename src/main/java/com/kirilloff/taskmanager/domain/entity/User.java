@@ -1,10 +1,14 @@
 package com.kirilloff.taskmanager.domain.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -30,10 +34,18 @@ public class User implements UserDetails {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotBlank(message = "Имя пользователя не может быть пустым")
+  @Size(min = 3, max = 50)
+  @Column(nullable = false, unique = true)
   private String username;
 
+  @NotBlank(message = "Пароль не может быть пустым")
+  @Column(nullable = false)
   private String password;
 
+  @NotNull
+  @Size(min = 3, max = 50)
+  @Column(nullable = false)
   private String role;
 
   @Override

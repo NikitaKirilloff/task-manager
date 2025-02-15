@@ -4,10 +4,14 @@ import com.kirilloff.taskmanager.controller.TaskController;
 import com.kirilloff.taskmanager.domain.request.TaskRequestDTO;
 import com.kirilloff.taskmanager.domain.response.TaskResponseDTO;
 import com.kirilloff.taskmanager.service.TaskService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,57 +26,69 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
+@Validated
 public class DefaultTaskController implements TaskController {
 
   private final TaskService service;
 
   @GetMapping("/{id}")
-  public TaskResponseDTO getTask(@PathVariable UUID id) {
-    return service.getTaskById(id);
+  public ResponseEntity<TaskResponseDTO> getTask(@PathVariable UUID id) {
+    return ResponseEntity.ok(service.getTaskById(id));
   }
 
   @GetMapping
-  public List<TaskResponseDTO> getTasks(@RequestParam LocalDate start, @RequestParam LocalDate end, @RequestParam Boolean completed) {
-    return service.getTasks(start, end, completed);
+  public ResponseEntity<List<TaskResponseDTO>> getTasks(
+      @RequestParam @NotNull(message = "Дата начала не может быть пустой") LocalDate start,
+      @RequestParam @NotNull(message = "Дата окончания не может быть пустой") LocalDate end,
+      @RequestParam(required = false) Boolean completed) {
+    if (end.isBefore(start)) {
+      throw new IllegalArgumentException("Дата окончания не может быть раньше даты начала");
+    }
+    return ResponseEntity.ok(service.getTasks(start, end, completed));
   }
 
   @GetMapping("/today")
-  public List<TaskResponseDTO> getTodayTasks(@RequestParam(required = false) Boolean completed) {
+  public ResponseEntity<List<TaskResponseDTO>> getTodayTasks(
+      @RequestParam(required = false) Boolean completed) {
     LocalDate today = LocalDate.now();
-    return service.getTasks(today, today, completed);
+    return ResponseEntity.ok(service.getTasks(today, today, completed));
   }
 
   @GetMapping("/week")
-  public List<TaskResponseDTO> getWeekTasks(@RequestParam(required = false) Boolean completed) {
+  public ResponseEntity<List<TaskResponseDTO>> getWeekTasks(
+      @RequestParam(required = false) Boolean completed) {
     LocalDate today = LocalDate.now();
     LocalDate end = today.plusDays(7);
-    return service.getTasks(today, end, completed);
+    return ResponseEntity.ok(service.getTasks(today, end, completed));
   }
 
   @GetMapping("/month")
-  public List<TaskResponseDTO> getMonthTasks(@RequestParam(required = false) Boolean completed) {
+  public ResponseEntity<List<TaskResponseDTO>> getMonthTasks(
+      @RequestParam(required = false) Boolean completed) {
     LocalDate today = LocalDate.now();
     LocalDate end = today.plusMonths(1);
-    return service.getTasks(today, end, completed);
+    return ResponseEntity.ok(service.getTasks(today, end, completed));
   }
 
   @PostMapping
-  public TaskResponseDTO createTask(@RequestBody TaskRequestDTO task) {
-    return service.createTask(task);
+  public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO task) {
+    return ResponseEntity.ok(service.createTask(task));
   }
 
   @PutMapping("/{id}")
-  public TaskResponseDTO updateTask(@PathVariable UUID id, @RequestBody TaskRequestDTO taskUpdateDTO) {
-    return service.updateTask(id, taskUpdateDTO);
+  public ResponseEntity<TaskResponseDTO> updateTask(@PathVariable UUID id,
+      @Valid @RequestBody TaskRequestDTO taskUpdateDTO) {
+    return ResponseEntity.ok(service.updateTask(id, taskUpdateDTO));
   }
 
   @PatchMapping("/{id}/complete")
-  public TaskResponseDTO toggleTaskCompletion(@PathVariable UUID id) {
-    return service.toggleTaskCompletion(id);
+  public ResponseEntity<TaskResponseDTO> toggleTaskCompletion(@PathVariable UUID id) {
+    return ResponseEntity.ok(service.toggleTaskCompletion(id));
   }
 
   @DeleteMapping("/{id}")
-  public void deleteTask(@PathVariable UUID id) {
+  public ResponseEntity<Void> deleteTask(@PathVariable UUID id) {
     service.deleteTask(id);
+    return ResponseEntity.noContent().build();
   }
 }

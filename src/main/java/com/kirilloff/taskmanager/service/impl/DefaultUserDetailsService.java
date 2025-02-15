@@ -1,7 +1,7 @@
 package com.kirilloff.taskmanager.service.impl;
 
 import com.kirilloff.taskmanager.domain.entity.User;
-import com.kirilloff.taskmanager.domain.request.UserDto;
+import com.kirilloff.taskmanager.domain.request.UserRequestDTO;
 import com.kirilloff.taskmanager.domain.response.AuthenticatedResponseDTO;
 import com.kirilloff.taskmanager.exception.InvalidRefreshToken;
 import com.kirilloff.taskmanager.exception.UserAlreadyExistsException;
@@ -41,14 +41,14 @@ public class DefaultUserDetailsService implements UserDetailsService {
     );
   }
 
-  public AuthenticatedResponseDTO createNewUser(UserDto userDto) {
-    if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
+  public AuthenticatedResponseDTO createNewUser(UserRequestDTO userRequestDTO) {
+    if (userRepository.findByUsername(userRequestDTO.getUsername()).isPresent()) {
       throw new UserAlreadyExistsException("Пользователь с таким именем уже существует");
     }
 
     User user = new User();
-    user.setUsername(userDto.getUsername());
-    user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+    user.setUsername(userRequestDTO.getUsername());
+    user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
     user.setRole("USER");
 
     userRepository.save(user);
@@ -56,14 +56,14 @@ public class DefaultUserDetailsService implements UserDetailsService {
     return generateAuthResponse(user);
   }
 
-  public AuthenticatedResponseDTO authenticate(UserDto userDto) {
+  public AuthenticatedResponseDTO authenticate(UserRequestDTO userRequestDTO) {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-            userDto.getUsername(),
-            userDto.getPassword()
+            userRequestDTO.getUsername(),
+            userRequestDTO.getPassword()
         )
     );
-    var user = userRepository.findByUsername(userDto.getUsername()).orElseThrow();
+    var user = userRepository.findByUsername(userRequestDTO.getUsername()).orElseThrow();
     return generateAuthResponse(user);
   }
 
@@ -71,7 +71,8 @@ public class DefaultUserDetailsService implements UserDetailsService {
     String username = jwtService.extractUsername(refreshToken);
 
     if (username != null) {
-      var user = userRepository.findByUsername(username).orElseThrow();
+      var user = userRepository.findByUsername(username)
+          .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
       if (jwtService.isTokenValid(refreshToken, user)) {
         return generateAuthResponse(user);

@@ -8,5 +8,7 @@ import java.util.UUID;
 import org.springframework.data.repository.CrudRepository;
 
 public interface TaskRepository extends CrudRepository<Task, UUID> {
-  List<Task> findByUserAndDueDateBetweenAndCompleted(User user, LocalDate start, LocalDate end, boolean completed);
+
+  List<Task> findByUserAndDueDateBetweenAndCompleted(User user, LocalDate start, LocalDate end,
+      boolean completed);
 }
