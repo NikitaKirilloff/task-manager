@@ -11,6 +11,7 @@ import org.mapstruct.MappingTarget;
 public interface TaskMapper {
 
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "user", ignore = true)
   void updateTaskFromDto(TaskRequestDTO dto, @MappingTarget Task task);
 
   TaskResponseDTO toDto(Task task);

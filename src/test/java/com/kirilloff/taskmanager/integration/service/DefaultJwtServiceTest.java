@@ -62,7 +62,7 @@ class DefaultJwtServiceTest extends BaseIntegrationTest {
     String token = Jwts.builder()
         .subject(userDetails.getUsername())
         .issuedAt(new Date())
-        .expiration(new Date(System.currentTimeMillis() - 1000)) // Истекший токен
+        .expiration(new Date(System.currentTimeMillis() - 1000))
         .signWith(Keys.hmacShaKeyFor("mySecretKeymySecretKeymySecretKeymySecretKey".getBytes()),
             Jwts.SIG.HS256)
         .compact();
