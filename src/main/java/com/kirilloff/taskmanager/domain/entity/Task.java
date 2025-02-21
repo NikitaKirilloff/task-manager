@@ -11,25 +11,25 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Entity
 @Table(name = "tasks")
 public class Task {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @EqualsAndHashCode.Exclude
   private UUID id;
 
   @Size(min = 1, max = 100, message = "Название должно содержать от 1 до 100 символов")
@@ -46,4 +46,31 @@ public class Task {
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null) {
+      return false;
+    }
+    Class<?> oEffectiveClass =
+        o instanceof HibernateProxy proxy ? proxy.getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy proxy ? proxy.getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) {
+      return false;
+    }
+    Task task = (Task) o;
+    return getId() != null && Objects.equals(getId(), task.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+    return this instanceof HibernateProxy proxy ? proxy.getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

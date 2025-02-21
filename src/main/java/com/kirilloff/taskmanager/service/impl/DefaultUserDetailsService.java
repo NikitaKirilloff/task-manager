@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,8 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultUserDetailsService implements UserDetailsService {
 
   private final JwtService jwtService;
+
   private final UserRepository userRepository;
+
   private final PasswordEncoder passwordEncoder;
+
   private final AuthenticationManager authenticationManager;
 
   @Override
@@ -85,5 +89,21 @@ public class DefaultUserDetailsService implements UserDetailsService {
     var accessToken = jwtService.generateAccessToken(user.getUsername());
     var refreshToken = jwtService.generateRefreshToken(user.getUsername());
     return new AuthenticatedResponseDTO("Token issued", accessToken, refreshToken);
+  }
+
+  User getCurrentUser() {
+    String username = getCurrentUsername();
+    return userRepository.findByUsername(username)
+        .orElseThrow(
+            () -> new UsernameNotFoundException("Пользователь не найден, обратитесь в поддержку"));
+  }
+
+  private String getCurrentUsername() {
+    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (principal instanceof UserDetails userDetails) {
+      return userDetails.getUsername();
+    } else {
+      return principal.toString();
+    }
   }
 }
