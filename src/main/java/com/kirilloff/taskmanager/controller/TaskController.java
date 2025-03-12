@@ -3,7 +3,6 @@ package com.kirilloff.taskmanager.controller;
 import com.kirilloff.taskmanager.domain.request.TaskRequestDTO;
 import com.kirilloff.taskmanager.domain.response.TaskResponseDTO;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -16,10 +15,7 @@ public interface TaskController {
 
   ResponseEntity<TaskResponseDTO> getTask(@PathVariable UUID id);
 
-  ResponseEntity<List<TaskResponseDTO>> getTasks(
-      @RequestParam @NotNull(message = "Дата начала не может быть пустой") LocalDate start,
-      @RequestParam @NotNull(message = "Дата окончания не может быть пустой") LocalDate end,
-      @RequestParam(required = false) Boolean completed);
+  ResponseEntity<List<TaskResponseDTO>> getTasks(LocalDate start, LocalDate end, Boolean completed);
 
   ResponseEntity<List<TaskResponseDTO>> getWeekTasks(
       @RequestParam(required = false) Boolean completed);
